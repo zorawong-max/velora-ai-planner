@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
+import { RfqForm } from "@/components/rfq/RfqForm";
 
 export const metadata: Metadata = {
   title: "RFQ",
@@ -7,9 +7,15 @@ export const metadata: Metadata = {
 
 export default function RfqPage() {
   return (
-    <PagePlaceholder
-      title="RFQ"
-      description="Placeholder page. Business logic and UI not yet implemented."
-    />
+    <div className="mx-auto max-w-2xl px-4 py-12">
+      <h1 className="text-2xl font-semibold tracking-tight">Request for Quote</h1>
+      <p className="text-muted-foreground mt-2 text-sm">
+        Confirm your details to send this blueprint to the VELORA supplier network.
+      </p>
+
+      <div className="mt-8">
+        <RfqForm />
+      </div>
+    </div>
   );
 }
