@@ -7,7 +7,7 @@ export function Header() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <Link href="/" className="flex items-center" aria-label={siteConfig.name}>
           {/* eslint-disable-next-line @next/next/no-img-element -- static brand SVG, no optimization needed */}
-          <img src="/brand/logo-black.svg" alt="VELORA" className="h-9 w-auto" />
+          <img src="/brand/logo-black.svg" alt="VELORA" className="h-11 w-auto" />
         </Link>
 
         <nav className="flex items-center gap-6">
