@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" fill="none">
+  <title>VELORA</title>
+  <circle cx="100" cy="60" r="42" stroke="#0B0B0B" stroke-width="6" />
+  <path d="M78 42 L100 82 L122 42" stroke="#0B0B0B" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="130" cy="30" r="7" fill="#0B0B0B" />
+  <text
+    x="100"
+    y="148"
+    text-anchor="middle"
+    font-family="Inter, Arial, sans-serif"
+    font-weight="700"
+    font-size="34"
+    letter-spacing="6"
+    fill="#0B0B0B"
+  >VELORA</text>
+</svg>
