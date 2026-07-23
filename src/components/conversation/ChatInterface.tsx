@@ -1,62 +1,62 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-
-interface ChatMessage {
-  id: string;
-  role: "assistant" | "user";
-  content: string;
-}
-
-const INITIAL_MESSAGE: ChatMessage = {
-  id: "assistant-0",
-  role: "assistant",
-  content:
-    "Hi — tell me about the AI infrastructure you're looking to plan. Include the workload type, scale, target timeline, and budget if you know them.",
-};
-
-// Scripted follow-ups standing in for the real AI backend — replace this
-// with an actual model call when the conversation service is wired up.
-const SCRIPTED_REPLIES = [
-  "Got it. What scale are you thinking — a single server, a rack, or a full cluster?",
-  "Thanks — that helps. Do you have a target deployment timeline or budget range in mind?",
-  "That's enough for a first draft. I've put together a blueprint based on what you've shared.",
-];
+import { usePlannerStore } from "@/store/planner-store";
+import { continueConversation } from "@/actions/conversation";
+import { generateBlueprint } from "@/actions/blueprint";
+import type { ChatMessage } from "@/lib/ai/types";
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
-  const [draft, setDraft] = useState("");
-  const [exchangeCount, setExchangeCount] = useState(0);
-  const inputId = useId();
+  const messages = usePlannerStore((state) => state.messages);
+  const readyForBlueprint = usePlannerStore((state) => state.readyForBlueprint);
+  const addMessages = usePlannerStore((state) => state.addMessages);
+  const setReadyForBlueprint = usePlannerStore((state) => state.setReadyForBlueprint);
+  const setBlueprint = usePlannerStore((state) => state.setBlueprint);
 
-  const readyForBlueprint = exchangeCount >= SCRIPTED_REPLIES.length;
+  const [draft, setDraft] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const inputId = useId();
 
   function handleSend() {
     const trimmed = draft.trim();
-    if (!trimmed) return;
+    if (!trimmed || isPending) return;
 
-    const userMessage: ChatMessage = {
-      id: `user-${messages.length}`,
-      role: "user",
-      content: trimmed,
-    };
-
-    const replyIndex = Math.min(exchangeCount, SCRIPTED_REPLIES.length - 1);
-    const assistantMessage: ChatMessage = {
-      id: `assistant-${messages.length + 1}`,
-      role: "assistant",
-      content: SCRIPTED_REPLIES[replyIndex],
-    };
-
-    setMessages((prev) => [...prev, userMessage, assistantMessage]);
-    setExchangeCount((count) => count + 1);
+    setError(null);
+    const userMessage: ChatMessage = { role: "user", content: trimmed };
+    const history = [...messages, userMessage];
+    addMessages([userMessage]);
     setDraft("");
+
+    startTransition(async () => {
+      const result = await continueConversation(history);
+
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
+      addMessages([{ role: "assistant", content: result.data.reply }]);
+
+      if (result.data.readyForBlueprint) {
+        setReadyForBlueprint(true);
+        const blueprintResult = await generateBlueprint([
+          ...history,
+          { role: "assistant", content: result.data.reply },
+        ]);
+        if (blueprintResult.success) {
+          setBlueprint(blueprintResult.data);
+        } else {
+          setError(blueprintResult.error);
+        }
+      }
+    });
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -70,9 +70,9 @@ export function ChatInterface() {
     <div className="flex h-[32rem] flex-col overflow-hidden rounded-xl border">
       <ScrollArea className="flex-1 px-4 py-5">
         <div className="flex flex-col gap-4">
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <div
-              key={message.id}
+              key={index}
               className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
             >
               <div
@@ -87,10 +87,19 @@ export function ChatInterface() {
               </div>
             </div>
           ))}
+          {isPending && (
+            <div className="flex justify-start">
+              <div className="bg-muted text-muted-foreground max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm">
+                …
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
 
       <div className="border-t p-3">
+        {error && <p className="text-destructive mb-2 px-1 text-xs">{error}</p>}
+
         {readyForBlueprint ? (
           <div className="flex items-center justify-between gap-3 px-1 py-1">
             <p className="text-muted-foreground flex items-center gap-1.5 text-sm">
@@ -117,12 +126,13 @@ export function ChatInterface() {
               onKeyDown={handleKeyDown}
               placeholder="Describe your infrastructure needs…"
               rows={1}
+              disabled={isPending}
               className="max-h-32 min-h-10 resize-none"
             />
             <Button
               size="icon"
               onClick={handleSend}
-              disabled={!draft.trim()}
+              disabled={!draft.trim() || isPending}
               aria-label="Send message"
               className="bg-brand text-brand-foreground hover:bg-brand/90 shrink-0"
             >

@@ -1,33 +1,43 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useTransition } from "react";
+import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePlannerStore } from "@/store/planner-store";
+import { submitRfq } from "@/actions/rfq";
 
 interface RfqFormValues {
   companyName: string;
   contactEmail: string;
   notes: string;
+  hpAddress: string;
 }
 
 const INITIAL_VALUES: RfqFormValues = {
   companyName: "",
   contactEmail: "",
   notes: "",
+  hpAddress: "",
 };
 
 export function RfqForm() {
+  const blueprint = usePlannerStore((state) => state.blueprint);
+  const messages = usePlannerStore((state) => state.messages);
+
   const [values, setValues] = useState<RfqFormValues>(INITIAL_VALUES);
   const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const companyId = useId();
   const emailId = useId();
   const notesId = useId();
+  const honeypotId = useId();
 
   function updateField<K extends keyof RfqFormValues>(field: K, value: RfqFormValues[K]) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -35,14 +45,47 @@ export function RfqForm() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // No backend wired up yet — this simulates a submission so the flow can
-    // be reviewed end-to-end. Replace with a real request when the RFQ
-    // service exists.
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    if (!blueprint) return;
+
+    setError(null);
+    startTransition(async () => {
+      const result = await submitRfq({
+        companyName: values.companyName,
+        contactEmail: values.contactEmail,
+        notes: values.notes,
+        hpAddress: values.hpAddress,
+        blueprint,
+        conversation: messages,
+      });
+
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
       setSubmitted(true);
-    }, 600);
+    });
+  }
+
+  if (!blueprint) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center py-12 text-center">
+          <h2 className="text-lg font-semibold">No blueprint yet</h2>
+          <p className="text-muted-foreground mt-2 max-w-sm text-sm">
+            Complete a conversation with the AI Planner to generate a blueprint before requesting a
+            quote.
+          </p>
+          <Button
+            render={<Link href="/conversation" />}
+            nativeButton={false}
+            className="bg-brand text-brand-foreground hover:bg-brand/90 mt-6"
+          >
+            Start Planning
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (submitted) {
@@ -66,6 +109,21 @@ export function RfqForm() {
     <Card>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div
+            className="absolute top-auto left-[-9999px] h-px w-px overflow-hidden"
+            aria-hidden="true"
+          >
+            <label htmlFor={honeypotId}>Leave this field blank</label>
+            <input
+              id={honeypotId}
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={values.hpAddress}
+              onChange={(event) => updateField("hpAddress", event.target.value)}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor={companyId}>Company Name</Label>
             <Input
@@ -100,12 +158,14 @@ export function RfqForm() {
             />
           </div>
 
+          {error && <p className="text-destructive text-xs">{error}</p>}
+
           <Button
             type="submit"
-            disabled={submitting}
+            disabled={isPending}
             className="bg-brand text-brand-foreground hover:bg-brand/90 w-full sm:w-auto"
           >
-            {submitting ? "Sending…" : "Send RFQ"}
+            {isPending ? "Sending…" : "Send RFQ"}
           </Button>
         </form>
       </CardContent>
