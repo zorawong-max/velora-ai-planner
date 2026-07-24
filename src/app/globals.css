@@ -83,7 +83,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --brand: #1d4ed8;
+  /* Phase 6: global design system is black/white/neutral gray. `--brand`
+     is repointed to black rather than removed, so every existing
+     bg-brand/text-brand usage updates automatically, and brand blue can
+     come back later as an intentional accent via a single value change
+     here instead of re-touching every component. */
+  --brand: #0b0b0b;
   --brand-foreground: #ffffff;
 }
 
@@ -119,8 +124,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  --brand: #3b82f6;
-  --brand-foreground: #ffffff;
+  --brand: #ffffff;
+  --brand-foreground: #0b0b0b;
 }
 
 @layer base {
