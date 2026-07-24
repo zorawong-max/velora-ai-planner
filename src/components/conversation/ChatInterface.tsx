@@ -77,10 +77,8 @@ export function ChatInterface() {
             >
               <div
                 className={cn(
-                  "max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed",
-                  message.role === "user"
-                    ? "bg-brand text-brand-foreground"
-                    : "bg-muted text-foreground",
+                  "max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed text-black",
+                  message.role === "user" ? "border border-[#E5E7EB] bg-white" : "bg-[#F7F7F7]",
                 )}
               >
                 {message.content}
@@ -89,7 +87,7 @@ export function ChatInterface() {
           ))}
           {isPending && (
             <div className="flex justify-start">
-              <div className="bg-muted text-muted-foreground max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm">
+              <div className="text-muted-foreground max-w-[80%] rounded-lg bg-[#F7F7F7] px-3.5 py-2.5 text-sm">
                 …
               </div>
             </div>
