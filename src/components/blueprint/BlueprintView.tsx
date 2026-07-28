@@ -14,7 +14,7 @@ function buildSections(blueprint: BlueprintData) {
     {
       icon: Cpu,
       title: "Compute Requirements",
-      description: "Recommended configuration based on your conversation",
+      description: "Recommended configuration based on your planning wizard answers",
       items: [
         { label: "Workload type", value: blueprint.workloadType },
         { label: "GPU configuration", value: blueprint.gpuConfiguration },

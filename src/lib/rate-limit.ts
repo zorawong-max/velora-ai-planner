@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Best-effort in-memory rate limiter for AI Planner Server Actions.
+ * Best-effort in-memory rate limiter for Blueprint Server Actions.
  *
  * IMPORTANT: this is per-instance, in-memory state. It is fine for a
  * single long-lived server (or local dev) but on Vercel's serverless
