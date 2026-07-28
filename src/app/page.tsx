@@ -39,7 +39,7 @@ export default function LandingPage() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Button
-            render={<Link href="/conversation" />}
+            render={<Link href="/blueprint" />}
             nativeButton={false}
             size="lg"
             className="bg-brand text-brand-foreground hover:bg-brand/90"

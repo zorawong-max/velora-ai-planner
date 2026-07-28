@@ -27,7 +27,7 @@ const INITIAL_VALUES: RfqFormValues = {
 
 export function RfqForm() {
   const blueprint = usePlannerStore((state) => state.blueprint);
-  const messages = usePlannerStore((state) => state.messages);
+  const answers = usePlannerStore((state) => state.answers);
 
   const [values, setValues] = useState<RfqFormValues>(INITIAL_VALUES);
   const [submitted, setSubmitted] = useState(false);
@@ -55,7 +55,7 @@ export function RfqForm() {
         notes: values.notes,
         hpAddress: values.hpAddress,
         blueprint,
-        conversation: messages,
+        answers,
       });
 
       if (!result.success) {
@@ -73,11 +73,10 @@ export function RfqForm() {
         <CardContent className="flex flex-col items-center py-12 text-center">
           <h2 className="text-lg font-semibold">No blueprint yet</h2>
           <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-            Complete a conversation with the AI Planner to generate a blueprint before requesting a
-            quote.
+            Complete the planning wizard to generate a blueprint before requesting expert review.
           </p>
           <Button
-            render={<Link href="/conversation" />}
+            render={<Link href="/blueprint" />}
             nativeButton={false}
             className="bg-brand text-brand-foreground hover:bg-brand/90 mt-6"
           >
@@ -95,10 +94,10 @@ export function RfqForm() {
           <div className="bg-brand/10 text-brand flex size-12 items-center justify-center rounded-full">
             <CheckCircle2 className="size-6" aria-hidden="true" />
           </div>
-          <h2 className="mt-5 text-lg font-semibold">RFQ sent</h2>
+          <h2 className="mt-5 text-lg font-semibold">Review requested</h2>
           <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-            Your request has been sent to the VELORA supplier network. The team will follow up with
-            matched suppliers shortly.
+            Your blueprint has been sent to the VELORA team. An expert will follow up shortly to
+            review your requirements.
           </p>
         </CardContent>
       </Card>
@@ -165,7 +164,7 @@ export function RfqForm() {
             disabled={isPending}
             className="bg-brand text-brand-foreground hover:bg-brand/90 w-full sm:w-auto"
           >
-            {isPending ? "Sending…" : "Send RFQ"}
+            {isPending ? "Sending…" : "Request Expert Review"}
           </Button>
         </form>
       </CardContent>

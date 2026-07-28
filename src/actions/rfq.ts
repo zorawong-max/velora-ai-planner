@@ -4,14 +4,14 @@ import { headers } from "next/headers";
 import { rfqSchema } from "@/schemas/rfq";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
-import type { ChatMessage, BlueprintData } from "@/lib/ai/types";
+import type { BlueprintData } from "@/lib/ai/types";
 import type { RfqSubmissionInsert } from "@/types/database";
 import type { ActionResult } from "@/types/actions";
 import type { RfqInput } from "@/schemas/rfq";
 
 export interface SubmitRfqInput extends RfqInput {
   blueprint: BlueprintData;
-  conversation: ChatMessage[];
+  answers: Partial<BlueprintData>;
 }
 
 export async function submitRfq(input: SubmitRfqInput): Promise<ActionResult<null>> {
@@ -39,7 +39,7 @@ export async function submitRfq(input: SubmitRfqInput): Promise<ActionResult<nul
   if (!input.blueprint) {
     return {
       success: false,
-      error: "No blueprint found for this session. Please complete the conversation first.",
+      error: "No blueprint found for this session. Please complete the planning wizard first.",
     };
   }
 
@@ -56,7 +56,9 @@ export async function submitRfq(input: SubmitRfqInput): Promise<ActionResult<nul
     contact_email: parsed.data.contactEmail,
     notes: parsed.data.notes || null,
     blueprint: input.blueprint,
-    conversation: input.conversation,
+    // Column is named `conversation` from an earlier chat-based design; it
+    // now stores the flat planning-wizard answers instead of a transcript.
+    conversation: input.answers,
   };
 
   try {

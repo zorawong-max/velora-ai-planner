@@ -2,41 +2,38 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ChatMessage, BlueprintData } from "@/lib/ai/types";
+import type { BlueprintData } from "@/lib/ai/types";
 
-const INITIAL_MESSAGE: ChatMessage = {
-  role: "assistant",
-  content:
-    "Hi — tell me about the AI infrastructure you're looking to plan. Include the workload type, scale, target timeline, and budget if you know them.",
-};
+export type WizardStep = "compute" | "deployment" | "investment";
+
+export const WIZARD_STEPS: WizardStep[] = ["compute", "deployment", "investment"];
 
 interface PlannerState {
-  messages: ChatMessage[];
-  readyForBlueprint: boolean;
+  step: WizardStep;
+  answers: Partial<BlueprintData>;
   blueprint: BlueprintData | null;
-  addMessages: (messages: ChatMessage[]) => void;
-  setReadyForBlueprint: (ready: boolean) => void;
+  setAnswers: (patch: Partial<BlueprintData>) => void;
+  setStep: (step: WizardStep) => void;
   setBlueprint: (blueprint: BlueprintData) => void;
   reset: () => void;
 }
 
 /**
- * Client-side session state carrying the real conversation transcript and
- * generated blueprint across /conversation, /blueprint, and /rfq. There is
- * no server-side session store in this MVP — persisted to localStorage so
- * a refresh doesn't lose progress.
+ * Client-side session state carrying the wizard answers and generated
+ * blueprint across /blueprint and /rfq. There is no server-side session
+ * store in this MVP — persisted to localStorage so a refresh doesn't lose
+ * progress.
  */
 export const usePlannerStore = create<PlannerState>()(
   persist(
     (set) => ({
-      messages: [INITIAL_MESSAGE],
-      readyForBlueprint: false,
+      step: "compute",
+      answers: {},
       blueprint: null,
-      addMessages: (newMessages) =>
-        set((state) => ({ messages: [...state.messages, ...newMessages] })),
-      setReadyForBlueprint: (ready) => set({ readyForBlueprint: ready }),
+      setAnswers: (patch) => set((state) => ({ answers: { ...state.answers, ...patch } })),
+      setStep: (step) => set({ step }),
       setBlueprint: (blueprint) => set({ blueprint }),
-      reset: () => set({ messages: [INITIAL_MESSAGE], readyForBlueprint: false, blueprint: null }),
+      reset: () => set({ step: "compute", answers: {}, blueprint: null }),
     }),
     { name: "velora-ai-planner-session" },
   ),

@@ -1,6 +1,6 @@
 export const siteConfig = {
-  name: "VELORA AI Planner",
-  description: "AI-assisted planning workspace for VELORA infrastructure procurement.",
+  name: "VELORA Blueprint",
+  description: "Enterprise AI Infrastructure Blueprint workflow — plan, generate, and request expert review.",
 } as const;
 
 export interface NavItem {
@@ -10,8 +10,7 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Conversation", href: "/conversation" },
   { label: "Blueprint", href: "/blueprint" },
-  { label: "RFQ", href: "/rfq" },
+  { label: "Expert Review", href: "/rfq" },
   { label: "Contact", href: "/contact" },
 ];

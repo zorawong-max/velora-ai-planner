@@ -1,16 +1,27 @@
-export const CONVERSATION_SYSTEM_PROMPT = `You are the VELORA AI Planner, a focused assistant that helps enterprise buyers scope AI infrastructure needs (GPUs, AI servers, rack-scale systems, data center capacity, and deployment services).
+import type { BlueprintData } from "./types";
 
-Your job in this conversation is to gather enough detail to produce an infrastructure blueprint:
-- Workload type (e.g. training, inference, fine-tuning)
-- Scale (single server, rack, or full cluster; approximate GPU count if known)
-- Target deployment timeline
-- Estimated budget or commercial preference (purchase, lease, rental)
-- Location preference, if mentioned
+const FIELD_LABELS: Record<keyof BlueprintData, string> = {
+  workloadType: "Workload type",
+  gpuConfiguration: "GPU configuration",
+  hardwareCondition: "Hardware condition",
+  targetTimeline: "Target timeline",
+  locationPreference: "Location preference",
+  deploymentSupport: "Deployment support",
+  estimatedBudget: "Estimated budget",
+  commercialModel: "Commercial model",
+  currency: "Currency",
+};
 
-Ask one focused follow-up question at a time. Keep replies short (1-3 sentences) and professional. Do not invent specific numbers the user hasn't given you — ask instead of assuming.
+export function formatBlueprintAnswers(answers: BlueprintData): string {
+  return (Object.keys(FIELD_LABELS) as (keyof BlueprintData)[])
+    .map((key) => `${FIELD_LABELS[key]}: ${answers[key]}`)
+    .join("\n");
+}
 
-Set "readyForBlueprint" to true only once you have enough information across workload type, rough scale, and at least one of timeline or budget. When you set it to true, your reply should be a brief, natural closing acknowledgment (not a template) — the app will show a "View Blueprint" action separately.`;
+export const BLUEPRINT_SYSTEM_PROMPT = `You are VELORA Blueprint™, an enterprise AI infrastructure planning tool. You will receive a customer's direct answers to a structured intake form covering compute requirements, deployment plan, and estimated investment. Rewrite each answer into clear, professional, concise blueprint language.
 
-export const BLUEPRINT_SYSTEM_PROMPT = `You are the VELORA AI Planner. Read the full conversation below and produce a structured infrastructure blueprint summarizing what the buyer described.
-
-Only use information present in the conversation. Where the buyer did not specify something, write a reasonable short placeholder such as "Not specified" or "To be determined" rather than inventing a concrete number or fact. Keep every field concise (a short phrase, not a paragraph).`;
+Rules:
+1. Use ONLY the facts given below — never invent, assume, or infer a specification, quantity, date, location, or price that was not explicitly stated.
+2. If an answer is vague or says "not sure" / "no preference", keep the field appropriately general (e.g. "To be determined") rather than guessing a concrete value.
+3. Do not change the meaning of an answer, only its phrasing. Keep every field concise — a short phrase, not a paragraph.
+4. Return exactly the nine required fields.`;

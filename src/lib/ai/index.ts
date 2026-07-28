@@ -30,4 +30,4 @@ export function getAIProvider(): AIProvider {
   return cachedProvider;
 }
 
-export type { AIProvider, ChatMessage, ConversationTurnResult, BlueprintData } from "./types";
+export type { AIProvider, BlueprintData } from "./types";

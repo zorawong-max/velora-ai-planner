@@ -17,7 +17,9 @@ export type RfqSubmissionRow = {
   contact_email: string;
   notes: string | null;
   blueprint: Record<string, unknown>;
-  conversation: Record<string, unknown>[];
+  // Historically a chat transcript (array); now the flat planning-wizard
+  // answers object. Column name retained to avoid a schema migration.
+  conversation: Record<string, unknown>;
 };
 
 export type RfqSubmissionInsert = Omit<RfqSubmissionRow, "id" | "created_at" | "status"> &

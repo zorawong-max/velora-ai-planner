@@ -1,15 +1,9 @@
 import { z } from "zod";
 
-// What the model returns for a single conversational turn. `readyForBlueprint`
-// is the model's own judgment call — once true, the app generates a blueprint
-// instead of continuing to ask questions.
-export const conversationTurnSchema = z.object({
-  reply: z.string(),
-  readyForBlueprint: z.boolean(),
-});
-
-// Structured infrastructure blueprint, generated from the full conversation.
-// Field names line up with the sections already rendered in BlueprintView.
+// Structured infrastructure blueprint. The Planning Wizard collects one raw
+// answer per field; `generateBlueprint` rewrites those into this same shape
+// with polished, professional phrasing. Field names line up with the
+// sections rendered in BlueprintView.
 export const blueprintSchema = z.object({
   workloadType: z.string(),
   gpuConfiguration: z.string(),
